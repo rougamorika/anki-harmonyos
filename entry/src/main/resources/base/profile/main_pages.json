@@ -1,0 +1,9 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/ReviewPage",
+    "pages/BrowserPage",
+    "pages/StatsPage",
+    "pages/ImportPage"
+  ]
+}

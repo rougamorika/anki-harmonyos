@@ -1,0 +1,12 @@
+{
+  "app": {
+    "bundleName": "com.example.anki4hap",
+    "vendor": "anki4hap",
+    "versionCode": 1000000,
+    "versionName": "0.1.0",
+    "minAPIVersion": 12,
+    "targetAPIVersion": 12,
+    "icon": "$media:app_icon",
+    "label": "$string:app_name"
+  }
+}

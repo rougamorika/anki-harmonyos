@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<style>
+  html,body{margin:0;padding:0;background:#f7f8fc;color:#1f2430;font-family:sans-serif}
+  #qa{box-sizing:border-box;min-height:100vh;padding:22px 18px 96px;font-size:20px;line-height:1.55;word-break:break-word}
+  .card{background:white}img,video{max-width:100%;height:auto}
+  hr#answer{border:0;border-top:1px solid #d9deea;margin:20px 0}
+  .cloze{color:#246BFE;font-weight:700}audio{width:100%;margin:10px 0}
+  .template-error{color:#E95F5F;padding:16px;background:#FFF0F0;border-radius:8px}
+  .template-empty{color:#E39B33;padding:16px;background:#FFF8E8;border-radius:8px;text-align:center}
+  .hint{color:#246BFE;cursor:pointer;text-decoration:underline}
+  input#typeans{width:100%;font-size:18px;padding:8px 12px;border:1px solid #d9deea;border-radius:6px;margin:8px 0}
+</style></head>
+<body><main id="qa" class="card">Loading…</main>
+<script>
+  window.Anki4Hap={setHtml(html){const q=document.getElementById('qa');q.style.opacity='0';q.innerHTML=html||'<p>No card.</p>';requestAnimationFrame(()=>{window.scrollTo(0,0);q.style.opacity='1'})}};
+</script></body></html>

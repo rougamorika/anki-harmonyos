@@ -1,0 +1,10 @@
+{
+  "modelVersion": "5.1.0",
+  "name": "anki4hap",
+  "version": "0.1.0",
+  "description": "HarmonyOS 6.1 Anki spaced repetition client",
+  "main": "",
+  "author": "",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {}
+}

@@ -1,0 +1,9 @@
+{
+  "name": "anki_shared",
+  "version": "1.0.0",
+  "description": "Anki4Hap Shared Pure Logic Library",
+  "main": "",
+  "author": "",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {}
+}

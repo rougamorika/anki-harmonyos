@@ -1,0 +1,20 @@
+# DevEco build outputs
+entry/build/
+.cxx/
+.hvigor/
+
+# Dependencies
+node_modules/
+oh_modules/
+
+# IDE
+.idea/
+.vs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp files
+*.tmp
+tmp_*
