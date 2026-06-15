@@ -1,96 +1,203 @@
-# 🎴 Anki for HarmonyOS
+# 🎴 Anki4Hap — 鸿蒙上的 Anki
 
-> 把全球最流行的间隔重复记忆神器搬到鸿蒙生态。
+> ⚠️ **警告：目前是屎山。核心逻辑靠 Node 测试验证, ArkTS 层正在和 DevEco 编译器搏斗。能跑但随时会炸。**
 
-[![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-206_passing-brightgreen)](#运行测试)
-[![DevEco](https://img.shields.io/badge/DevEco-6.1.1-orange)](#-当前状态)
+[![Tests](https://img.shields.io/badge/Node_tests-206_passing-brightgreen)](https://github.com/rougamorika/anki-harmonyos/actions)
+[![DevEco](https://img.shields.io/badge/DevEco_compile-🔥_调试中-red)](https://github.com/rougamorika/anki-harmonyos/issues)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](https://www.gnu.org/licenses/agpl-3.0.html)
 
 ---
 
 ## 🤔 这是什么
 
-[Anki](https://apps.ankiweb.net) 是全球 5000 万+ 用户使用的开源间隔重复记忆软件。**Anki4Hap** 是它的 HarmonyOS Next 移植版——让你在 MatePad、MatePhone 等鸿蒙设备上刷卡片、背单词。
+[Anki](https://apps.ankiweb.net) 是全球最流行的开源间隔重复记忆软件（5000万+用户）。**Anki4Hap** 是它的 **HarmonyOS Next 移植版**。
 
-**目前阶段：纯逻辑层 100% 完成，ArkTS 编译调试中。需要你的帮助！**
+不是套壳。纯逻辑层（调度、模板、搜索、统计）从 Anki 25.09.2 的 Rust 源码一行行对照写出来的 TypeScript，Node 可独立运行和测试。ArkTS 层通过严格的 strict mode 编译，目标是生成可在 MatePad/MatePhone/Pura 上运行的 HAP 包。
 
----
+**目前的阶段：纯逻辑层已完成, 正在让它在 DevEco Studio 里编译通过, 然后就能在真机上跑起来了。**
 
-## 🧭 当前状态
-
-| 层 | 完成度 | 状态 |
-|----|--------|------|
-| **shared 纯逻辑** | ✅ 100% | 27 文件, 9 套测试 ~206 用例, Node 全部通过 |
-| **ArkTS 服务层** | ⚠️ 90% | 已适配 ArkTS strict mode, API 兼容性待验证 |
-| **ArkUI 页面** | 🚧 骨架 | 5 页框架已搭建, 交互待完善 |
-| **DevEco 编译** | 🔴 调试中 | ApkgReader 刚替换 zlib.decompressFile, 待验证 |
-
-### 纯逻辑层覆盖 (node 测试全绿)
-
-- 🧠 **SM-2 调度器** — 完整状态机, 4 按钮, Leech 检测, Fuzz
-- 🧠 **FSRS-5 调度器** — 记忆状态计算, 参数优化, SM-2 桥接
-- 📝 **模板引擎** — Lexer → Parser → Renderer 三阶段, 支持条件/过滤器/Cloze
-- 🔍 **搜索引擎** — Anki 查询语法 → 参数化 SQL
-- 📦 **.apkg 导入** — ZIP 解析, 集合检测, 媒体提取
-- 📊 **统计计算** — 复习曲线, 遗忘曲线, 到期预测
-- 💾 **完整数据库层** — Schema/Card/Note/Deck/Revlog CRUD
+要命的是——我没有鸿蒙设备, 也没装 DevEco, 这是最大的瓶颈。如果你有环境, 帮忙 Build 一下。
 
 ---
 
-## 🆘 我们需要帮助
+## 📊 进度清单
 
-### 🔴 最紧急 — DevEco 编译调试
+### shared 纯逻辑层 (TypeScript, Node 运行)
 
-我只有一台 Windows 开发机，**没有真机/模拟器**。以下需要鸿蒙开发者帮忙：
+所有模块均可在 Node 下独立测试, 不依赖任何 HarmonyOS API。
 
-1. **编译通过** — 打开 DevEco Studio, Build → 修复 API 差异
-2. **真机运行** — 验证 RDB/SQLite 能正常打开 collection.anki2
-3. **导入 .apkg** — 验证 ApkgReaderService 能正确解压 ZIP
-4. **卡片渲染** — 验证 WebView + 模板引擎输出正确
+| # | 模块 | 功能 | 对应 Rust 源码 | 状态 |
+|---|------|------|----------------|------|
+| 1 | `template/` | 模板引擎: Lexer → Parser → Renderer | `rslib/src/template.rs` (1377行) | ✅ |
+| 2 | `sm2.ts` | SM-2 调度器: 4态状态机, Leech, Fuzz | `rslib/src/scheduler/states/*.rs` | ✅ |
+| 3 | `fsrs.ts` | FSRS-5 调度器: memoryState, nextStates | `fsrs` crate v5.2.0 | ✅ |
+| 4 | `search.ts` | Anki 查询语法 → 参数化 SQL | `rslib/src/search/parser.rs` (1308行) | ✅ |
+| 5 | `db/` | 数据库层: Schema, DeckTree, CardQuery, Revlog | `rslib/src/storage/` | ✅ |
+| 6 | `package/` | .apkg ZIP 导入: 中央目录解析, 媒体提取 | `rslib/src/import_export/package/` | ✅ |
+| 7 | `filters.ts` | 模板过滤器: text, hint, furigana, kanji, kana | `rslib/src/template_filters.rs` (303行) | ✅ |
+| 8 | `stats.ts` | 统计: 复习曲线, 遗忘曲线, 到期预测 | `rslib/src/stats/` | ✅ |
+| 9 | `ops.ts` | CRUD: updateCard, buryCard, addNote, addRevlog | `rslib/src/card/mod.rs` + `notes/` | ✅ |
+| 10 | `collection.ts` | 牌组配置管理, 筛选牌组, 集合完整性检查 | `rslib/src/deckconfig/` + `collection/` | ✅ |
+| 11 | `card.ts` | 类型定义: CardRow, CardType, CardQueue, StateContext | 跨模块类型 | ✅ |
 
-### 🟡 需要的技能
+### DevEco / ArkUI 层
 
-- 用过 DevEco Studio / ArkTS
-- 了解 HarmonyOS 文件系统 / SQLite API
-- 或者只是想学鸿蒙开发想找个项目练手
+| # | 任务 | 说明 |
+|---|------|------|
+| 12 | 🔥 `ApkgReaderService` 编译通过 | ZIP 直接解析替代 zlib.decompressFile |
+| 13 | 🔥 导入 .apkg 真机验证 | 选文件 → 解析 ZIP → 写入 RDB → 显示牌组 |
+| 14 | 🔥 复习页面真机验证 | WebView 渲染卡片 → 点按钮 → SM-2 调度 → 写回 DB |
+| 15 | 卡片浏览器 | 搜索+浏览+分页 |
+| 16 | 统计页面 | 复习曲线柱状图 + 评分分布 |
+| 17 | HAP 打包签名 | Build → Sign → 安装到真机 |
 
-### 🟢 如何参与
+> ✅ = 已完成, 🔥 = 正在进行, 空白 = 未开始
+
+---
+
+## 🏗 架构
+
+```
+┌─────────────────────────────────────────┐
+│ ArkUI Pages                              │
+│ Index / Review / Browser / Stats / Import│
+├─────────────────────────────────────────┤
+│ Entry Services (ArkTS strict mode)       │
+│ AnkiDbService / ReviewService             │
+│ ImportService / ApkgReaderService         │
+├─────────────────────────────────────────┤
+│ shared/anki/ (平台无关 TypeScript)         │
+│ 模板引擎 │ SM-2/FSRS │ 搜索 │ 统计 │ CRUD │
+├─────────────────────────────────────────┤
+│ HarmonyOS Platform (@kit.*)              │
+│ RDB / FileIO / WebView / zlib             │
+└─────────────────────────────────────────┘
+```
+
+**设计原则:** shared 层是纯函数/无副作用, 接口驱动 (DbConnection, PlatformIO, DeflateDecoder)。entry 层实现这些接口, 注入到 shared 层调用。shared 层 Node 可测试, entry 层在 DevEco 编译。
+
+---
+
+## 🧪 运行测试
+
+Node 18+ 即可, 不需要 DevEco:
+
+```powershell
+npm install -g tsx
+tsx tests/template.test.ts    # 模板引擎 (43 cases)
+tsx tests/sm2.test.ts         # SM-2 调度 (18 cases)
+tsx tests/fsrs.test.ts        # FSRS 调度 (25 cases)
+tsx tests/search.test.ts      # 搜索引擎 (35 cases)
+tsx tests/db.test.ts          # 数据库层 (28 cases)
+tsx tests/package.test.ts     # .apkg 导入 (15 cases)
+tsx tests/package.stress.test.ts  # 压测 (17 cases)
+tsx tests/ops.test.ts         # CRUD (13 cases)
+tsx tests/collection.test.ts  # 合集 (12 cases)
+```
+
+共 **~206 用例, 0 失败** (2026-06-14)。
+
+---
+
+## 📁 项目结构
+
+```
+anki-harmonyos/
+├── entry/src/main/ets/      ← ArkTS 平台层
+│   ├── entryability/        ← EntryAbility
+│   ├── model/               ← AnkiModels.ets (类型导出)
+│   ├── pages/               ← 5 个 ArkUI 页面
+│   │   ├── Index.ets        ← 牌组列表主页
+│   │   ├── ReviewPage.ets   ← 复习页 (WebView + 4按钮)
+│   │   ├── BrowserPage.ets  ← 卡片浏览器
+│   │   ├── StatsPage.ets    ← 统计页
+│   │   └── ImportPage.ets   ← 导入页
+│   └── services/            ← 平台桥接服务
+│       ├── AnkiDbService.ets   ← RDB 数据库
+│       ├── ReviewService.ets   ← SM-2 调度 + 模板渲染
+│       ├── ImportService.ets   ← 文件选择 + 导入编排
+│       └── ApkgReaderService.ets ← .apkg ZIP 直接解析
+├── shared/anki/             ← 纯逻辑 (27 文件, ~4700 行)
+│   ├── template/            ← 模板引擎
+│   ├── db/                  ← 数据库层
+│   ├── package/             ← .apkg 导入
+│   ├── sm2.ts / fsrs.ts     ← 调度器
+│   ├── search.ts            ← 搜索引擎
+│   ├── stats.ts             ← 统计
+│   ├── ops.ts               ← CRUD
+│   ├── filters.ts           ← 模板过滤器
+│   ├── collection.ts        ← 牌组配置/筛选牌组
+│   └── card.ts              ← 类型定义
+├── tests/                   ← Node 单元测试 (9 套)
+├── docs/                    ← 中文技术文档 (8 篇)
+├── AppScope/                ← 鸿蒙应用配置
+├── build-profile.json5      ← 构建配置
+└── hvigorfile.ts            ← 构建入口
+```
+
+---
+
+## 📖 开发者文档
+
+如果你是第一次接触这个项目, 按顺序阅读:
+
+1. **[01-anki-architecture-cn.md](docs/01-anki-architecture-cn.md)** — Anki 整体架构剖析, 数据库 Schema, Card 结构
+2. **[02-scheduler-algorithm-cn.md](docs/02-scheduler-algorithm-cn.md)** — SM-2/FSRS 调度算法伪代码和公式
+3. **[03-template-engine-cn.md](docs/03-template-engine-cn.md)** — 模板引擎三阶段: Lex → Parse → Render
+4. **[04-apkg-import-cn.md](docs/04-apkg-import-cn.md)** — .apkg ZIP 格式解析和导入流程
+5. **[08-project-summary-cn.md](docs/08-project-summary-cn.md)** — 项目总览, 完成度矩阵
+
+### 关键技术对照表
+
+| Anki Rust | 本项目 TS | 说明 |
+|-----------|----------|------|
+| `rslib/src/template.rs` | `shared/anki/template/` | 模板引擎 (5文件) |
+| `rslib/src/scheduler/states/review.rs` | `shared/anki/sm2.ts` | SM-2 间隔公式 |
+| `fsrs` crate v5.2 | `shared/anki/fsrs.ts` | FSRS-5 调度 |
+| `rslib/src/search/parser.rs` | `shared/anki/search.ts` | 搜索语法 → SQL |
+| `rslib/src/import_export/package/` | `shared/anki/package/` | .apkg 导入 |
+| `rslib/src/storage/schema11.sql` | `shared/anki/db/schema.ts` | 数据库 Schema |
+
+### ArkTS strict mode 要点
+
+HarmonyOS Next 的 ArkTS 编译器非常挑剔。写代码时必须遵守:
+
+- ❌ **不能解构** — `const { a, b } = obj` → `let a = obj.a; let b = obj.b`
+- ❌ **不能动态属性** — `obj[key]` 不行 → 用 `Record<string, X>` cast 后访问
+- ❌ **不能索引签名** — `interface X { [key: string]: Y }` 不行 → 用 `Record<string, Y>`
+- ❌ **所有对象字面量必须有类型** — `{ a: 1 }` 不行 → `let x: MyType = { a: 1 }`
+- ❌ **TextEncoder/TextDecoder 不存在** → 手写 UTF-8 解码, 或用 `util.TextEncoder`
+- ❌ **`fileIo.writeTextSync` 不存在** → 用 `openSync` + `writeSync(fd.fd, str)` + `closeSync`
+
+---
+
+## 🆘 我们需要你
+
+### 🔴 已知问题 (Issue 欢迎认领)
+
+1. **ApkgReaderService 编译不通过** — `fileIo.readSync(fd.fd, buf, options)` API 签名需要确认
+2. **zlib.decompressSync 参数** — 3 参数的 deflate 解压是否支持
+3. **导入后 RDB 打开失败** — `collection.anki2` 写入后 `getRdbStore` 能否正常打开
+4. **WebView 卡片渲染** — `reviewer.html` 加载后 `runJavaScript` 能否正常执行
+5. **复习按钮事件** — 4 个 Again/Hard/Good/Easy 按钮点到后是否正确写回 DB
+
+### 🟡 需要用到的
+
+- **DevEco Studio 6.1+** (我们用的是 6.1.1.280)
+- **HarmonyOS 真机或模拟器** (不需要签名, Debug 模式即可)
+- 或者你只是想看看 ArkTS strict mode 有多变态
+
+### 🟢 参与方式
 
 ```powershell
 git clone https://github.com/rougamorika/anki-harmonyos.git
 cd anki-harmonyos
-npx tsx tests/template.test.ts  # 跑测试
-# 然后用 DevEco Studio 打开, Build!
+npx tsx tests/template.test.ts    # 确认测试通过
 ```
 
-直接提 Issue 或 PR，或者邮件联系。任何帮助都欢迎——修一个 API 签名、改一行颜色、写一句文档。
+然后在 DevEco Studio 中 `File → Open → 选择 anki-harmonyos 目录`，Build → 修 Bug → PR。
 
----
-
-## 🏗 项目结构
-
-```
-entry/src/main/ets/      ← ArkTS 平台层 (需要调试!)
-  ├── services/           ← AnkiDbService, ReviewService, ImportService, ApkgReaderService
-  └── pages/              ← Index, Review, Browser, Stats, Import
-shared/anki/              ← 纯逻辑层 (已完成, 可放心使用)
-  ├── template/           ← 模板引擎    ├── sm2.ts / fsrs.ts  ← 调度器
-  ├── db/                 ← 数据库层    ├── search.ts         ← 搜索引擎
-  └── package/            ← apkg 导入   └── stats.ts          ← 统计计算
-tests/                    ← Node 单元测试 (9 套, ~206 用例)
-docs/                     ← 中文技术文档 (8 篇)
-```
-
----
-
-## 📖 相关文档
-
-| 文档 | 内容 |
-|------|------|
-| [`docs/01-anki-architecture-cn.md`](docs/01-anki-architecture-cn.md) | Anki 整体架构与移植分析 |
-| [`docs/02-scheduler-algorithm-cn.md`](docs/02-scheduler-algorithm-cn.md) | SM-2/FSRS 算法详细拆解 |
-| [`docs/03-template-engine-cn.md`](docs/03-template-engine-cn.md) | 模板引擎分析 |
-| [`docs/08-project-summary-cn.md`](docs/08-project-summary-cn.md) | 项目总览 |
+有任何问题直接开 Issue, 不用客气。
 
 ---
 
