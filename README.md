@@ -1,10 +1,19 @@
 # 🎴 Anki4Hap — 鸿蒙上的 Anki
 
-> ⚠️ **警告：目前是屎山。核心逻辑靠 Node 测试验证, ArkTS 层正在和 DevEco 编译器搏斗。能跑但随时会炸。**
+> # ⚠️ 这是一座屎山
+>
+> **核心逻辑靠 Node 测试验证（都绿），ArkTS 层正在和 DevEco 编译器搏斗。**
+>
+> 能跑 pure logic，但 **没有在真机上跑通过**。
+> 架构是对的，代码是对着 Rust 一行行抄的，但 DevEco strict mode 有一万个坑。
+> 你看到的 entry/ 代码 **大概率编译不过**，需要人帮忙踩坑。
+> 如果你有 DevEco 环境 + 鸿蒙设备，这就是你来拯救的项目。
+>
+> **现在你知道了。往下看吧。**
 
 [![Tests](https://img.shields.io/badge/Node_tests-206_passing-brightgreen)](https://github.com/rougamorika/anki-harmonyos/actions)
 [![DevEco](https://img.shields.io/badge/DevEco_compile-🔥_调试中-red)](https://github.com/rougamorika/anki-harmonyos/issues)
-[![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](https://www.gnu.org/licenses/agpl-3.0.html)
+[![License](https://img.shields.io/badge/license-AGPL--3.0-blue)](LICENSE)
 
 ---
 
